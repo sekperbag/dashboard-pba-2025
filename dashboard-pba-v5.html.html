@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard AR & SR — PT Pelayaran Bahtera Adhiguna 2025</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0A2240;--navy2:#1A3A5C;--accent:#4A9FDB;--gold:#C8962A;
+  --ok:#1B8C50;--ok-bg:#D4EDDA;--ok-txt:#155724;
+  --warn:#C87D00;--warn-bg:#FFF3CD;--warn-txt:#856404;
+  --err:#C0392B;--err-bg:#F8D7DA;--err-txt:#721C24;
+  --bg:#F0F2F5;--surface:#fff;--border:#DEE2E8;
+  --text:#1A1D23;--muted:#6B7280;--r:10px;--r-sm:6px;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+.hdr{background:var(--navy);color:#fff;padding:16px 22px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+.hdr-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:12px}
+.hdr-logo{display:flex;align-items:center;gap:10px}
+.logo-c{width:38px;height:38px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.hdr h1{font-size:14px;font-weight:600;line-height:1.4}
+.hdr .sub{font-size:11px;color:#7FA8C8;margin-top:2px}
+.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.live{background:#1B4D2E;color:#6FEBA0;font-size:10px;padding:3px 9px;border-radius:20px;font-weight:600;display:flex;align-items:center;gap:4px}
+.ldot{width:6px;height:6px;border-radius:50%;background:#6FEBA0;animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.ref-row{display:flex;align-items:center;gap:6px}
+.ref-info{font-size:10px;color:rgba(255,255,255,.4)}
+.ref-btn{font-size:10px;padding:3px 8px;border:1px solid rgba(255,255,255,.2);border-radius:4px;background:transparent;color:rgba(255,255,255,.6);cursor:pointer}
+.ref-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.rpt-sw{display:flex;gap:6px;margin-bottom:10px}
+.rpt-btn{padding:5px 16px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid rgba(255,255,255,.25);color:rgba(255,255,255,.6);background:transparent;transition:all .15s}
+.rpt-btn.active{background:#fff;color:var(--navy);border-color:#fff}
+.tabs{display:flex}
+.tab{padding:8px 16px;font-size:12px;color:rgba(255,255,255,.5);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.tab:hover{color:rgba(255,255,255,.8)}
+.tab.active{color:#fff;border-bottom-color:var(--accent)}
+.body{padding:16px 18px;max-width:1100px;margin:0 auto}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;gap:12px}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading p{font-size:12px;color:var(--muted)}
+.setup-box{background:#FFFBEB;border:1px solid #F0D080;border-radius:var(--r);padding:14px 16px;margin-bottom:14px;font-size:12px;line-height:1.7}
+.setup-box strong{color:var(--navy)}
+.setup-box code{background:#EEE;padding:1px 5px;border-radius:3px;font-size:11px;font-family:monospace}
+.url-row{display:flex;gap:8px;margin-top:10px}
+.url-row input{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:12px}
+.url-row button,.btn-p{padding:8px 16px;background:var(--navy);color:#fff;border:none;border-radius:var(--r-sm);cursor:pointer;font-size:12px;white-space:nowrap;font-weight:600}
+.url-row button:hover,.btn-p:hover{background:var(--navy2)}
+.info-box{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:var(--r);padding:10px 14px;font-size:11px;color:#1E40AF;margin-bottom:12px;line-height:1.7}
+.info-box code{background:#DBEAFE;padding:1px 5px;border-radius:3px;font-size:10px;font-family:monospace}
+.panel{display:none}.panel.active{display:block}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+.metric .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.metric .val{font-size:22px;font-weight:600;color:var(--text);line-height:1}
+.metric .hint{font-size:10px;margin-top:3px}
+.prog-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:14px}
+.prog-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px}
+.prog-bg{background:var(--bg);height:10px;border-radius:5px;overflow:hidden}
+.prog-fill{height:10px;border-radius:5px;background:var(--navy);transition:width .8s ease}
+.prog-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:5px}
+.sec{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.ov-row{display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border);cursor:pointer;border-radius:4px}
+.ov-row:last-child{border-bottom:none}
+.ov-row:hover{background:#F7F9FC}
+.ov-nm{flex:1;font-size:12px;font-weight:500}
+.ov-bar-w{width:110px}
+.ov-bar-bg{height:5px;background:var(--bg);border-radius:3px}
+.ov-bar-f{height:5px;border-radius:3px}
+.ov-pct{font-size:10px;color:var(--muted);min-width:28px;text-align:right}
+.ov-cnt{font-size:10px;color:var(--muted);min-width:40px;text-align:right}
+.pill{font-size:9px;padding:2px 8px;border-radius:20px;font-weight:600;white-space:nowrap}
+.pill-ok{background:var(--ok-bg);color:var(--ok-txt)}
+.pill-warn{background:var(--warn-bg);color:var(--warn-txt)}
+.pill-err{background:var(--err-bg);color:var(--err-txt)}
+.filter-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.f-btn{font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer}
+.f-btn:hover{border-color:var(--navy);color:var(--navy)}
+.f-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.div-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.div-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:12px 14px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.div-card:hover{border-color:var(--navy);box-shadow:0 2px 8px rgba(10,34,64,.08)}
+.div-card.sel{border:2px solid var(--navy)}
+.dc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:6px}
+.dc-nm{font-size:12px;font-weight:600;line-height:1.3}
+.dc-ct{font-size:10px;color:var(--muted);margin-top:3px}
+.mini-bg{height:4px;background:var(--bg);border-radius:2px;margin-top:8px}
+.mini-f{height:4px;border-radius:2px}
+.det-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-top:12px}
+.det-title{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.doc-tbl{width:100%;border-collapse:collapse}
+.doc-tbl th{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:6px 8px;border-bottom:1px solid var(--border);text-align:left;font-weight:600}
+.doc-tbl td{padding:8px;border-bottom:1px solid var(--border);font-size:11px;vertical-align:middle}
+.doc-tbl tr:last-child td{border-bottom:none}
+.doc-tbl tr:hover td{background:#FAFBFC}
+.s-ic{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.ic-ok{background:var(--ok-bg);color:var(--ok-txt)}.ic-no{background:var(--err-bg);color:var(--err-txt)}
+.lnk-btn{font-size:10px;padding:4px 10px;border-radius:4px;text-decoration:none;font-weight:600;display:inline-block;white-space:nowrap}
+.lnk-ok{background:var(--navy);color:#fff}.lnk-ok:hover{background:var(--navy2)}
+.lnk-no{background:var(--err-bg);color:var(--err-txt);cursor:not-allowed;opacity:.7}
+.srch{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:12px;background:var(--surface);color:var(--text);margin-bottom:12px}
+.srch:focus{outline:none;border-color:var(--navy)}
+.doc-sec{margin-bottom:14px}
+.doc-sec-hd{font-size:11px;font-weight:700;color:var(--navy);padding:6px 10px;background:#EEF2F8;border-radius:var(--r-sm);margin-bottom:4px;display:flex;justify-content:space-between}
+.doc-er{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:4px;background:var(--surface);flex-wrap:wrap}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-ok{background:var(--ok)}.dot-no{background:var(--err)}
+.doc-enm{flex:1;font-size:11px;min-width:120px}
+.doc-eno{font-size:10px;color:var(--muted);min-width:24px;text-align:center;flex-shrink:0}
+.lnk-in{font-size:11px;padding:6px 8px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);width:250px;min-width:140px}
+.lnk-in:focus{outline:none;border-color:var(--accent);background:#fff}
+.lnk-in.ok{border-color:var(--ok);background:#F0FFF4}
+.lnk-in.bad{border-color:var(--err);background:#FFF5F5}
+.sv-btn{padding:6px 14px;background:var(--navy);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap}
+.sv-btn:hover{background:var(--navy2)}.sv-btn:disabled{opacity:.5;cursor:not-allowed}
+.sv-tag{font-size:10px;color:var(--ok);font-weight:600;display:none}
+.er-tag{font-size:10px;color:var(--err);display:none}
+.tl-item{display:flex;gap:12px}
+.tl-left{display:flex;flex-direction:column;align-items:center}
+.tl-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:2px}
+.td-done{background:var(--ok)}.td-act{background:var(--navy);box-shadow:0 0 0 3px rgba(10,34,64,.15)}.td-pend{background:var(--border)}
+.tl-con{width:2px;flex:1;background:var(--border);margin:3px 0;min-height:16px}
+.tl-cnt{padding-bottom:18px}
+.tl-lbl{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tl-dt{font-size:10px;color:var(--muted);margin-top:2px}
+.tl-det{font-size:11px;color:var(--muted);margin-top:3px}
+.act-b{font-size:9px;background:#D0E8F8;color:#0A4070;padding:2px 7px;border-radius:20px;font-weight:600}
+.done-b{font-size:9px;background:var(--ok-bg);color:var(--ok-txt);padding:2px 7px;border-radius:20px;font-weight:600}
+.tl-sel{font-size:10px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:var(--surface);margin-top:5px}
+.cfg-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;max-width:520px;margin-bottom:14px}
+.cfg-box label{font-size:12px;font-weight:600;display:block;margin-bottom:6px}
+.cfg-box input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:12px;margin-bottom:10px}
+.cfg-ok{font-size:11px;color:var(--ok);font-weight:600;display:none;margin-top:6px}
+.nota{font-size:11px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;line-height:1.8}
+.nota strong{color:var(--text)}
+.nota code{background:#EEE;padding:1px 5px;border-radius:3px;font-size:10px;font-family:monospace}
+@media(max-width:700px){.metrics{grid-template-columns:repeat(2,1fr)}.div-grid{grid-template-columns:repeat(2,1fr)}.lnk-in{width:150px}}
+@media(max-width:480px){.div-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="hdr-logo">
+      <div class="logo-c">BAg</div>
+      <div>
+        <h1>Dashboard Monitoring Penyusunan AR & SR 2025</h1>
+        <div class="sub">PT Pelayaran Bahtera Adhiguna &nbsp;·&nbsp; PIC: Divisi Tata Kelola Perusahaan</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="live"><div class="ldot"></div>LIVE</div>
+      <div class="ref-row">
+        <span class="ref-info" id="ref-time">—</span>
+        <button class="ref-btn" onclick="loadAll(true)">↻ Refresh</button>
+      </div>
+    </div>
+  </div>
+  <div class="rpt-sw">
+    <button class="rpt-btn active" onclick="switchReport('AR',this)">📄 Annual Report</button>
+    <button class="rpt-btn" onclick="switchReport('SR',this)">🌿 Sustainability Report</button>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('overview')">Overview</div>
+    <div class="tab" onclick="switchTab('divisi')">Per Divisi</div>
+    <div class="tab" onclick="switchTab('dokumen')">Kelola Dokumen</div>
+    <div class="tab" onclick="switchTab('timeline')">Timeline</div>
+    <div class="tab" onclick="switchTab('pengaturan')">Pengaturan</div>
+  </div>
+</div>
+
+<div class="body">
+  <div class="setup-box" id="setup-box">
+    <strong>⚙️ Sambungkan ke Google Sheets</strong><br/>
+    Tempel URL Google Apps Script Web App Anda di sini.<br/>
+    Cara mendapatkan: <code>Extensions → Apps Script → Deploy → New Deployment → Web App → Copy URL</code><br/>
+    Pastikan: <strong>Execute as: Me</strong> &nbsp;|&nbsp; <strong>Who has access: Anyone</strong>
+    <div class="url-row">
+      <input id="api-inp" type="text" placeholder="https://script.google.com/macros/s/.../exec"/>
+      <button onclick="setApi()">Sambungkan</button>
+    </div>
+  </div>
+
+  <div class="loading" id="loading" style="display:none">
+    <div class="spinner"></div>
+    <p id="ltxt">Memuat data...</p>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="panel" id="panel-overview">
+    <div class="metrics">
+      <div class="metric"><div class="lbl">Progress <span id="ml1">AR</span></div><div class="val" id="m-prog">—</div><div class="hint" id="m-prog-h"></div></div>
+      <div class="metric"><div class="lbl">Dokumen Terkumpul</div><div class="val" id="m-dok">—</div><div class="hint" id="m-dok-h" style="color:var(--muted)"></div></div>
+      <div class="metric"><div class="lbl">Divisi Lengkap</div><div class="val" id="m-div">—</div><div class="hint" id="m-div-h" style="color:var(--muted)"></div></div>
+      <div class="metric"><div class="lbl">Milestone Aktif</div><div class="val" id="m-mile" style="font-size:12px;padding-top:4px;line-height:1.3">—</div><div class="hint" id="m-mile-h" style="color:var(--muted)"></div></div>
+    </div>
+    <div class="prog-card">
+      <div class="prog-hdr"><strong>Progress pengumpulan data — <span id="ml2">Annual Report</span></strong><span id="prog-pct" style="font-size:14px;font-weight:700;color:var(--navy)">0%</span></div>
+      <div class="prog-bg"><div class="prog-fill" id="main-bar" style="width:0%"></div></div>
+      <div class="prog-labels"><span>Kick Off — 15 Jan 2025</span><span>Deadline — 30 Sep 2025</span></div>
+    </div>
+    <div class="sec">Status per divisi — <span id="ml3">Annual Report</span></div>
+    <div id="ov-list"></div>
+    <div style="font-size:10px;color:var(--muted);margin-top:10px;padding:8px 10px;background:var(--surface);border-radius:6px;border:1px solid var(--border)">
+      Klik nama divisi untuk detail · Auto-refresh setiap 5 menit · Data tersimpan di Google Sheets
+    </div>
+  </div>
+
+  <!-- PER DIVISI -->
+  <div class="panel" id="panel-divisi">
+    <div class="filter-row">
+      <button class="f-btn active" onclick="fDiv('all',this)">Semua</button>
+      <button class="f-btn" onclick="fDiv('complete',this)">Lengkap</button>
+      <button class="f-btn" onclick="fDiv('partial',this)">Sebagian</button>
+      <button class="f-btn" onclick="fDiv('missing',this)">Belum Isi</button>
+    </div>
+    <div class="div-grid" id="div-grid"></div>
+    <div class="det-box" id="det-box" style="display:none">
+      <div class="det-title" id="det-title"></div>
+      <table class="doc-tbl">
+        <thead><tr>
+          <th style="width:24px"></th><th style="width:30px;text-align:center">No</th>
+          <th>Dokumen / Data</th><th style="width:110px">Update</th><th style="width:70px;text-align:center">Link</th>
+        </tr></thead>
+        <tbody id="det-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- KELOLA DOKUMEN -->
+  <div class="panel" id="panel-dokumen">
+    <div class="info-box">
+      💡 <strong>Cara isi link:</strong> Buka file di Google Drive → klik kanan → <strong>Salin Tautan</strong> → paste di kolom input → klik <strong>Simpan</strong><br/>
+      Link harus diawali <code>https://drive.google.com/...</code> atau <code>https://docs.google.com/...</code>
+    </div>
+    <input class="srch" type="text" placeholder="🔍  Cari dokumen atau divisi..." oninput="srch(this.value)"/>
+    <div id="docs-container"></div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="panel" id="panel-timeline">
+    <div class="sec" style="margin-top:0">Milestone Project AR & SR 2025</div>
+    <div id="tl-wrap"></div>
+  </div>
+
+  <!-- PENGATURAN -->
+  <div class="panel" id="panel-pengaturan">
+    <div class="sec" style="margin-top:0">Koneksi Google Apps Script</div>
+    <div class="cfg-box">
+      <label>URL Google Apps Script Web App</label>
+      <input type="text" id="api-cfg" placeholder="https://script.google.com/macros/s/.../exec"/>
+      <button class="btn-p" onclick="setApiCfg()">Simpan & Reconnect</button>
+      <div class="cfg-ok" id="cfg-ok">✓ Berhasil tersambung!</div>
+    </div>
+    <div class="sec">Panduan Penggunaan</div>
+    <div class="nota">
+      <strong>Cara kerja dashboard:</strong><br/>
+      1. Data dibaca dari Google Sheets melalui Apps Script setiap halaman dimuat<br/>
+      2. Auto-refresh setiap <strong>5 menit</strong> — atau klik tombol ↻ Refresh di header<br/>
+      3. PIC divisi isi URL Google Drive di tab <strong>Kelola Dokumen</strong> → klik Simpan<br/>
+      4. Status ✓/✗ dan progress bar terupdate otomatis langsung tanpa reload<br/><br/>
+      <strong>⚠️ Link harus URL lengkap:</strong><br/>
+      ✓ <code>https://drive.google.com/file/d/xxx/view</code><br/>
+      ✓ <code>https://docs.google.com/spreadsheets/d/xxx</code><br/>
+      ✗ Nama file saja tidak berlaku (mis: <code>Laporan.xlsx</code>)<br/><br/>
+      <strong>Embed ke Google Sites:</strong><br/>
+      Insert → Embed → Embed Code → paste tag iframe dari file HTML ini
+    </div>
+  </div>
+</div>
+
+<script>
+// ================================================================
+// STATE
+// ================================================================
+let API='', rpt='AR', tab='overview', filt='all', q='';
+let dataAR=[], dataSR=[], miles=[];
+let timer=null;
+
+// ================================================================
+// INIT
+// ================================================================
+window.onload=()=>{
+  API=localStorage.getItem('pba_api_v4')||'';
+  if(API){
+    hide('setup-box');
+    document.getElementById('api-cfg').value=API;
+    loadAll(true);
+    autoRefresh();
+  }
+};
+
+function setApi(){
+  const v=document.getElementById('api-inp').value.trim();
+  if(!v.startsWith('https://script.google.com')){alert('URL tidak valid!\nHarus diawali: https://script.google.com/macros/s/...');return;}
+  API=v; localStorage.setItem('pba_api_v4',API);
+  hide('setup-box'); document.getElementById('api-cfg').value=API;
+  loadAll(true); autoRefresh();
+}
+function setApiCfg(){
+  const v=document.getElementById('api-cfg').value.trim();
+  if(!v)return;
+  API=v; localStorage.setItem('pba_api_v4',API);
+  hide('setup-box');
+  const el=document.getElementById('cfg-ok');
+  el.style.display='block'; setTimeout(()=>el.style.display='none',2500);
+  loadAll(true); autoRefresh();
+}
+function autoRefresh(){
+  if(timer)clearInterval(timer);
+  timer=setInterval(()=>loadAll(false),5*60*1000);
+}
+
+// ================================================================
+// FETCH — pakai JSONP agar tidak kena CORS
+// ================================================================
+let _cbIdx=0;
+function apiFetch(params){
+  return new Promise((res,rej)=>{
+    const cbName='_cb'+(_cbIdx++);
+    // Build URL manually to control encoding precisely
+    const baseUrl=API.includes('?')?API:API+'?';
+    let qs='callback='+encodeURIComponent(cbName)+'&t='+Date.now();
+    Object.entries(params).forEach(([k,v])=>{
+      qs+='&'+encodeURIComponent(k)+'='+encodeURIComponent(String(v));
+    });
+    const finalUrl=API+(API.includes('?')?'&':'?')+qs;
+
+    const s=document.createElement('script');
+    const timeout=setTimeout(()=>{
+      cleanup(); rej(new Error('Timeout — Apps Script tidak merespons dalam 15 detik'));
+    },15000);
+
+    window[cbName]=(data)=>{ cleanup(); res(data); };
+    function cleanup(){ clearTimeout(timeout); delete window[cbName]; if(s.parentNode)s.parentNode.removeChild(s); }
+    s.onerror=()=>{ cleanup(); rej(new Error('Gagal memuat script — cek URL Apps Script')); };
+    s.src=finalUrl;
+    document.head.appendChild(s);
+  });
+}
+
+async function loadAll(spin=true){
+  if(spin)showLoad(true,'Memuat data dari Google Sheets...');
+  try{
+    const [rAR,rSR,rM]=await Promise.all([
+      apiFetch({action:'getAR'}),
+      apiFetch({action:'getSR'}),
+      apiFetch({action:'getMilestones'})
+    ]);
+    if(rAR.success) dataAR=rAR.divisi||[];
+    if(rSR.success) dataSR=rSR.divisi||[];
+    if(rM.success)  miles =rM.milestones||[];
+    document.getElementById('ref-time').textContent=
+      'Diperbarui '+new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+    showLoad(false); renderAll();
+  }catch(e){
+    showLoad(false);
+    if(spin)alert('Gagal memuat data!\n\nError: '+e.message+'\n\nCek:\n1. URL Apps Script sudah benar\n2. Deploy dengan "Access: Anyone"\n3. Sudah jalankan initSheets()');
+    else console.warn('Refresh gagal:',e.message);
+  }
+}
+
+async function callAction(params){
+  return apiFetch(params);
+}
+
+// ================================================================
+// HELPERS
+// ================================================================
+function cur(){ return rpt==='AR'?dataAR:dataSR; }
+function isUrl(s){ return typeof s==='string'&&(s.startsWith('http://')||s.startsWith('https://')); }
+function docFilled(doc){ return doc.filled||isUrl(doc.link); }
+function hide(id){ document.getElementById(id).style.display='none'; }
+function show(id,d='block'){ document.getElementById(id).style.display=d; }
+
+function stats(data){
+  let total=0,filled=0,complete=0;
+  data.forEach(d=>{
+    total+=d.docs.length;
+    const f=d.docs.filter(docFilled).length;
+    filled+=f; if(f===d.docs.length)complete++;
+  });
+  return{total,filled,complete,pct:total?Math.round(filled/total*100):0};
+}
+function st(d){
+  const f=d.docs.filter(docFilled).length;
+  return f===d.docs.length?'complete':f===0?'missing':'partial';
+}
+function clr(s){ return s==='complete'?'#1B8C50':s==='missing'?'#C0392B':'#E8A020'; }
+function pill(s){
+  if(s==='complete')return'<span class="pill pill-ok">✓ Lengkap</span>';
+  if(s==='missing') return'<span class="pill pill-err">! Belum Isi</span>';
+  return'<span class="pill pill-warn">⋯ Sebagian</span>';
+}
+function showLoad(show,txt){
+  document.getElementById('loading').style.display=show?'flex':'none';
+  if(txt)document.getElementById('ltxt').textContent=txt;
+  if(!show)document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+tab));
+}
+
+// ================================================================
+// RENDER
+// ================================================================
+function renderAll(){ renderOv(); renderGrid(filt); renderDocs(); renderTl(); }
+
+function renderOv(){
+  const data=cur(), s=stats(data);
+  const lbl=rpt==='AR'?'Annual Report':'Sustainability Report';
+  ['ml1','ml2','ml3'].forEach((id,i)=>document.getElementById(id).textContent=i===0?rpt:lbl);
+  document.getElementById('m-prog').textContent=s.pct+'%';
+  const ph=document.getElementById('m-prog-h');
+  if(s.pct>=80){ph.textContent='✓ On Track';ph.style.color='var(--ok)';}
+  else if(s.pct>=50){ph.textContent='⚠ Perlu Perhatian';ph.style.color='var(--warn)';}
+  else{ph.textContent='! Di Bawah Target';ph.style.color='var(--err)';}
+  document.getElementById('m-dok').textContent=s.filled;
+  document.getElementById('m-dok-h').textContent='dari '+s.total+' dokumen';
+  document.getElementById('m-div').textContent=s.complete;
+  document.getElementById('m-div-h').textContent='dari '+data.length+' divisi';
+  const am=miles.find(m=>String(m.status).trim()==='active');
+  document.getElementById('m-mile').textContent=am?am.label:'—';
+  document.getElementById('m-mile-h').textContent=am?am.date:'';
+  document.getElementById('main-bar').style.width=s.pct+'%';
+  document.getElementById('prog-pct').textContent=s.pct+'%';
+  let h='';
+  cur().forEach(d=>{
+    const f=d.docs.filter(docFilled).length,pct=Math.round(f/d.docs.length*100),s2=st(d);
+    h+=`<div class="ov-row" onclick="switchTab('divisi');setTimeout(()=>showDet('${d.id}'),80)">
+      ${pill(s2)}<span class="ov-nm">${d.nama}</span>
+      <div class="ov-bar-w"><div class="ov-bar-bg"><div class="ov-bar-f" style="width:${pct}%;background:${clr(s2)}"></div></div></div>
+      <span class="ov-pct">${pct}%</span><span class="ov-cnt">${f}/${d.docs.length}</span>
+    </div>`;
+  });
+  document.getElementById('ov-list').innerHTML=h;
+}
+
+function renderGrid(filter='all'){
+  filt=filter; let h='';
+  cur().forEach(d=>{
+    const s2=st(d);
+    if(filter!=='all'&&s2!==filter)return;
+    const f=d.docs.filter(docFilled).length,pct=Math.round(f/d.docs.length*100);
+    h+=`<div class="div-card" id="card-${d.id}" onclick="showDet('${d.id}')">
+      <div class="dc-top"><div><div class="dc-nm">${d.nama}</div><div class="dc-ct">${f}/${d.docs.length} dokumen · ${pct}%</div></div>${pill(s2)}</div>
+      <div class="mini-bg"><div class="mini-f" style="width:${pct}%;background:${clr(s2)}"></div></div>
+    </div>`;
+  });
+  document.getElementById('div-grid').innerHTML=h||'<div style="font-size:12px;color:var(--muted);padding:12px;grid-column:1/-1">Tidak ada divisi dengan filter ini.</div>';
+  hide('det-box');
+}
+
+function fDiv(type,btn){
+  document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); renderGrid(type);
+}
+
+function showDet(id){
+  const d=cur().find(x=>x.id===id); if(!d)return;
+  document.querySelectorAll('.div-card').forEach(c=>c.classList.remove('sel'));
+  const card=document.getElementById('card-'+id);
+  if(card){card.classList.add('sel');card.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  const f=d.docs.filter(docFilled).length;
+  document.getElementById('det-title').innerHTML=`${d.nama} &nbsp;${pill(st(d))}&nbsp;<span style="font-size:11px;color:var(--muted);font-weight:400">${f}/${d.docs.length} terisi</span>`;
+  let rows='';
+  d.docs.forEach(doc=>{
+    const ok=docFilled(doc);
+    rows+=`<tr>
+      <td><div class="s-ic ${ok?'ic-ok':'ic-no'}">${ok?'✓':'!'}</div></td>
+      <td style="text-align:center;color:var(--muted);font-size:10px">${doc.no}</td>
+      <td>${doc.nama}</td>
+      <td style="font-size:10px;color:var(--muted)">${doc.updated_at||'—'}</td>
+      <td style="text-align:center">${ok?`<a href="${doc.link}" target="_blank" rel="noopener" class="lnk-btn lnk-ok">Buka ↗</a>`:`<span class="lnk-btn lnk-no">Kosong</span>`}</td>
+    </tr>`;
+  });
+  document.getElementById('det-tbody').innerHTML=rows;
+  show('det-box');
+}
+
+function renderDocs(){
+  const qlo=q.toLowerCase(); let h='';
+  cur().forEach(d=>{
+    const mDiv=d.nama.toLowerCase().includes(qlo);
+    const mDocs=d.docs.filter(doc=>mDiv||doc.nama.toLowerCase().includes(qlo));
+    if(!mDocs.length)return;
+    const f=d.docs.filter(docFilled).length;
+    h+=`<div class="doc-sec"><div class="doc-sec-hd"><span>${d.nama}</span><span style="font-size:10px;font-weight:400">${f}/${d.docs.length} terkumpul</span></div>`;
+    d.docs.forEach((doc,i)=>{
+      if(!mDiv&&!doc.nama.toLowerCase().includes(qlo))return;
+      const ok=docFilled(doc);
+      h+=`<div class="doc-er" id="er-${d.id}-${i}">
+        <div class="sdot ${ok?'dot-ok':'dot-no'}" id="dot-${d.id}-${i}"></div>
+        <span class="doc-eno">#${doc.no}</span>
+        <span class="doc-enm">${doc.nama}</span>
+        <input class="lnk-in ${ok?'ok':''}" id="inp-${d.id}-${i}" value="${doc.link||''}"
+          placeholder="https://drive.google.com/..." oninput="valInp(this)"/>
+        <button class="sv-btn" id="btn-${d.id}-${i}"
+          onclick="saveLink('${d.id}',${i},${doc.no})">Simpan</button>
+        <span class="sv-tag" id="sv-${d.id}-${i}">✓ Tersimpan!</span>
+        <span class="er-tag" id="er2-${d.id}-${i}"></span>
+      </div>`;
+    });
+    h+='</div>';
+  });
+  document.getElementById('docs-container').innerHTML=h||'<div style="font-size:12px;color:var(--muted);padding:12px">Tidak ada dokumen ditemukan.</div>';
+}
+
+function valInp(inp){
+  const v=inp.value.trim();
+  inp.classList.remove('ok','bad');
+  if(!v)return;
+  inp.classList.add(isUrl(v)?'ok':'bad');
+}
+function srch(v){ q=v; renderDocs(); }
+
+async function saveLink(divId,docIdx,docNo){
+  const inp=document.getElementById(`inp-${divId}-${docIdx}`);
+  const btn=document.getElementById(`btn-${divId}-${docIdx}`);
+  const svTag=document.getElementById(`sv-${divId}-${docIdx}`);
+  const erTag=document.getElementById(`er2-${divId}-${docIdx}`);
+  const link=inp.value.trim();
+
+  if(link&&!isUrl(link)){
+    inp.classList.add('bad');
+    alert('Link tidak valid!\n\nHarus dimulai dengan https:// atau http://\n\nContoh:\nhttps://drive.google.com/file/d/xxx/view\nhttps://docs.google.com/spreadsheets/d/xxx');
+    return;
+  }
+
+  btn.disabled=true; btn.textContent='...';
+  svTag.style.display='none'; erTag.style.display='none';
+
+  try{
+    const action=rpt==='AR'?'saveLinkAR':'saveLinkSR';
+    const res=await callAction({action,divisi_id:divId,doc_no:docNo,link:link});
+
+    if(res.success){
+      // Update local data
+      const data=rpt==='AR'?dataAR:dataSR;
+      const d=data.find(x=>x.id===divId);
+      if(d){ d.docs[docIdx].link=link; d.docs[docIdx].filled=res.filled; d.docs[docIdx].updated_at=res.updated_at; }
+
+      // Update UI langsung
+      const dot=document.getElementById(`dot-${divId}-${docIdx}`);
+      if(dot)dot.className='sdot '+(res.filled?'dot-ok':'dot-no');
+      inp.classList.remove('ok','bad');
+      if(res.filled)inp.classList.add('ok');
+
+      svTag.style.display='inline';
+      setTimeout(()=>svTag.style.display='none',3000);
+      renderOv(); renderGrid(filt);
+    } else {
+      erTag.textContent='✗ '+( res.error||'Gagal'); erTag.style.display='inline';
+      setTimeout(()=>erTag.style.display='none',6000);
+    }
+  }catch(e){
+    erTag.textContent='✗ '+e.message; erTag.style.display='inline';
+    setTimeout(()=>erTag.style.display='none',6000);
+  }
+  btn.disabled=false; btn.textContent='Simpan';
+}
+
+function renderTl(){
+  let h='';
+  miles.forEach((m,i)=>{
+    const s2=String(m.status||'').trim();
+    const dc=s2==='done'?'td-done':s2==='active'?'td-act':'td-pend';
+    const badge=s2==='done'?'<span class="done-b">✓ Selesai</span>':s2==='active'?'<span class="act-b">▶ Berjalan</span>':'';
+    h+=`<div class="tl-item">
+      <div class="tl-left"><div class="tl-dot ${dc}"></div>${i<miles.length-1?'<div class="tl-con"></div>':''}</div>
+      <div class="tl-cnt">
+        <div class="tl-lbl">${m.label} ${badge}</div>
+        <div class="tl-dt">🗓 ${m.date}</div>
+        <div class="tl-det">${m.detail}</div>
+        ${API?`<select class="tl-sel" onchange="updMile(${m.index},this.value)">
+          <option value="pending" ${s2==='pending'?'selected':''}>Pending</option>
+          <option value="active"  ${s2==='active' ?'selected':''}>Aktif / Berjalan</option>
+          <option value="done"    ${s2==='done'   ?'selected':''}>Selesai ✓</option>
+        </select>`:''}
+      </div>
+    </div>`;
+  });
+  document.getElementById('tl-wrap').innerHTML=h;
+}
+
+async function updMile(index,status){
+  try{
+    await callAction({action:'saveMilestone',index,status});
+    const m=miles.find(x=>Number(x.index)===Number(index));
+    if(m)m.status=status;
+    renderTl(); renderOv();
+  }catch(e){ alert('Gagal update milestone: '+e.message); }
+}
+
+// ================================================================
+// NAVIGASI
+// ================================================================
+function switchReport(r,btn){
+  rpt=r;
+  document.querySelectorAll('.rpt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  q=''; filt='all';
+  document.querySelectorAll('.f-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  hide('det-box'); renderAll();
+}
+function switchTab(name){
+  tab=name;
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  ['overview','divisi','dokumen','timeline','pengaturan'].forEach((n,i)=>
+    document.querySelectorAll('.tab')[i].classList.toggle('active',n===name));
+}
+</script>
+</body>
+</html>
